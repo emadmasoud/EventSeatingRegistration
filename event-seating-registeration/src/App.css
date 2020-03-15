@@ -4,11 +4,11 @@
   box-sizing: border-box;
 }
 body {
-  background: #1C8EF9 !important;
   min-height: 100vh;
   display: flex;
   font-weight: 400;
   font-family: 'Fira Sans', sans-serif;
+  background-color: white;
 }
 
 h1,h2,h3,h4,h5,h6,label,span {
@@ -17,8 +17,18 @@ h1,h2,h3,h4,h5,h6,label,span {
 }
 
 body, html, .App, #root, .auth-wrapper {
+  background: #1C8EF9 !important;
   width: 100%;
   height: 100%;
+}
+.container{
+  max-width: 100% !important;
+}
+
+.container .row{
+  text-align: -webkit-center !important;
+  margin: 0 !important;
+  width: 100% !important;
 }
 
 .navbar-light {
@@ -27,6 +37,7 @@ body, html, .App, #root, .auth-wrapper {
 }
 
 .auth-wrapper {
+  background: #1C8EF9 !important;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -71,3 +82,78 @@ body, html, .App, #root, .auth-wrapper {
 .forgot-password a {
   color: #167bff;
 }
+
+.seat-picker-container{
+  width: 95%;
+  margin: auto;
+  margin-top:30px;
+  margin-bottom:30px;
+  background: #ffffff;
+  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
+  padding: 40px 55px 45px 55px;
+  border-radius: 15px;
+  transition: all .3s;
+}
+.terms{
+  width: 70%;
+  margin: auto;
+  margin-top:30px;
+  margin-bottom:30px;
+  background: #ffffff;
+  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
+  padding: 40px 55px 45px 55px;
+  border-radius: 15px;
+  transition: all .3s;
+}
+
+
+.seat{
+  background-color: rgb(59, 59, 223)  !important;
+  height: 30px !important;
+  width: 30px !important;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+}
+
+.seat-picker__row--selected {
+  background-color: white !important;
+}
+
+.seat--selected{
+  background-color: rgb(81, 197, 81) !important;
+  cursor: pointer;
+  
+}
+.seat--reserved{
+  background-color: grey !important;
+  
+}
+.seat-picker__row.seat-picker__row--enabled:hover
+{
+  background-color: white !important;
+}
+
+.available-seats-color-hint{
+  height: 10px;
+  width: 30px;
+  display: inline-block;
+  background-color: rgb(59, 59, 223)  !important;
+}
+
+.reserved-seats-color-hint{
+  height: 10px;
+  width: 30px;
+  display: inline-block;
+  background-color:grey  !important;
+}
+
+.selected-seats-color-hint{
+  height: 10px;
+  width: 30px;
+  display: inline-block;
+  background-color: rgb(81, 197, 81) !important;
+}
+
