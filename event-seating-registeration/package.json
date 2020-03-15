@@ -16,6 +16,7 @@
     "react-seat-picker": "^1.5.2",
     "react-toasts": "^3.0.6",
     "react-tooltip": "^4.1.1",
+    "react-ui-cards": "^2.0.0",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0"
   },
