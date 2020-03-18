@@ -1,42 +1,81 @@
 import React, { Component } from 'react'
-import { Card } from 'react-bootstrap';
+
+// import { Row, Col, Container } from 'react-bootstrap';
+import { Card, Image, Icon, Container, Grid, GridRow, GridColumn } from 'semantic-ui-react';
 import SeatPicker from './SeatPicker';
-
+import Event from './Event';
+import axios from 'axios';
+import { BASE_URL } from './Config'
 export default class EventList extends Component {
-constructor(props)
-{
-    super(props);
-    this.state = {
-        eventsList: [],
-        selected_event: null
+    constructor(props) {
+        super(props);
+        this.state = {
+            eventsList: [],
+            selected_event: null
+        }
     }
-}
 
-    goToTableSelection = event =>{
+    componentWillMount() {
+        axios.get(BASE_URL + "events").then(response => {
+            if (response.data.success) {
+                let list = response.data.data;
+                list = list.concat([...response.data.data])
+                list = list.concat([...response.data.data])
+                list = list.concat([...response.data.data])
+                console.log(list.length)
+                this.setState({ eventsList: list })
+            }
+        })
+    }
+
+    getAllTables(event) {
+        let t_list = []
+        const params = {
+          eventID: event.id
+        };
+    
+        axios.get(BASE_URL + "getTables", { params }).then(response => {
+          if (response.data.success) {
+            t_list = response.data.data.map(ele => {
+              ele['isReserved'] = ele['isReserved'] == 0 ? false : true;
+              return ele;
+            })
+            
+            event['tables_list'] = t_list
+
+            if (this.state.selected_event != null && event.id == this.state.selected_event.id)
+                this.setState({ selected_event: null });
+            else
+                this.setState({ selected_event: event })
+          }
+
+
+
+        })
+    
+    
+    
+      }
+
+    goToTableSelection = event => {
         console.log(event);
-        if(this.state.selected_event != null && event.id == this.state.selected_event.id)
-            this.setState({selected_event: null});
-        else
-            this.setState({selected_event: event})
+        this.getAllTables(event);
+      
     }
 
 
     render() {
-        let eventsList = [{ id:1, name: "abc0", location: "California", date: "3/20/2020", time: "03:00", expiration_date: "3/16/202", no_of_tables: 100, cost_per_table: "200", available_tables:100 },
-        { id:2, name: "abc1", location: "California", date: "3/20/2020", time: "03:00", expiration_date: "3/16/202", no_of_tables: 100, cost_per_table: "200" ,available_tables:100},
-        {id:3, name: "abc2", location: "California", date: "3/20/2020", time: "03:00", expiration_date: "3/16/202", no_of_tables: 100, cost_per_table: "200" ,available_tables:100},
-        { id:4,name: "abc3", location: "California", date: "3/20/2020", time: "03:00", expiration_date: "3/16/202", no_of_tables: 100, cost_per_table: "200",available_tables:100 },
-        { id:5,name: "abc4", location: "California", date: "3/20/2020", time: "03:00", expiration_date: "3/16/202", no_of_tables: 100, cost_per_table: "200" ,available_tables:100}
-            , { id:6,name: "abc5", location: "California", date: "3/20/2020", time: "03:00", expiration_date: "3/16/202", no_of_tables: 100, cost_per_table: "200" ,available_tables:100}];
         return (
-            <div>
-                {this.state.selected_event == null && eventsList.map(ev => {
-                    return <Card onClick={() => this.goToTableSelection(ev)}>
-                        Name: {ev.name}                  
-                    </Card>
-                })}
+            <div className="">
+                <Grid className="justify-content-center">
+                    {this.state.selected_event == null &&
+                        this.state.eventsList.map(event => {
+                            return <Event event={event} goToTablePicker={this.goToTableSelection}></Event>
+                        })
+                    }
+                </Grid>
 
-                {this.state.selected_event != null? <SeatPicker event={this.state.selected_event}></SeatPicker>:""}
+            {this.state.selected_event != null? <SeatPicker event={this.state.selected_event}></SeatPicker>: null }
             </div>
         )
     }

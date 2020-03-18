@@ -16,10 +16,12 @@ function App() {
 
      <Switch>
      <Route exact path='/' component={TermsAndCondition} />
+     <Route exact path="/events" component={EventList} />   
      <Route exact path="/seatPicker" component={SeatPicker} />    
-     <Route exact path="/events" component={EventList} />    
+    
       
       <div className="auth-wrapper">
+      
         <div className="auth-inner">              
         <Route exact path="/register" component={RegistrationForm} />      
         </div>   

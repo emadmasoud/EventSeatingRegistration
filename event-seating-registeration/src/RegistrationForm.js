@@ -15,7 +15,7 @@ export default class SeatPlanner extends Component {
       phone: '',
       password: '',
       c_password: '',
-      class_no: 'Economic',
+      class_no: 'MBA2018',
       agreed: false,
       password_error_class: '',
       showSeatPickerButton: false
@@ -161,7 +161,7 @@ export default class SeatPlanner extends Component {
               onChange={this.onFormValueChangeHandler}
             >
 
-              <option value="Business">Business</option>
+              <option value="MBA2018">MBA2018</option>
               <option value="Economic">Economic</option>
             </select>
           </div>
