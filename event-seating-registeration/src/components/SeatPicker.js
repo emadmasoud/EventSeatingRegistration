@@ -3,14 +3,15 @@ import { Row, Col } from 'react-bootstrap'
 import SeatPicker from 'react-seat-picker'
 import { ToastsStore } from 'react-toasts';
 import axios from 'axios';
-import { BASE_URL } from './Config'
-export default class SeatPlanner extends Component {
+import { BASE_URL } from '../Config'
+import {connect} from 'react-redux';
+class SeatPlanner extends Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
-      event: this.props.event,
-      tables_list: this.props.event.tables_list,
+      event: this.props.selected_event,
+      tables_list: this.props.selected_event.tables_list,
       selectedTablesCount: 0,
       selectedTables: [],
       maxReservableTables: this.props.paidTablesCount ? this.props.paidTablesCount : 3,
@@ -26,17 +27,6 @@ export default class SeatPlanner extends Component {
    
   }
   
-  shouldComponentUpdate(nextProps, nextState)
-  {
-    if(this.state != nextState)
-      return true;
-    return false;
-  }
-
-
- 
-
-
   componentDidMount() {
 
     // this.getAllTables();
@@ -148,7 +138,7 @@ export default class SeatPlanner extends Component {
 
     let rowsE = this.getAlignedTables("E", this.state.tables_list)
 
-    console.log("render---------------------", rowsD, rowsE)
+    console.log("render---------------------", this.state.event)
     const { loading } = this.state
 
     return (
@@ -253,3 +243,15 @@ export default class SeatPlanner extends Component {
     )
   }
 }
+
+const mapStateToProps = state => {
+  return  {
+      selected_event: state.Event.selected
+    };
+}
+
+const mapDispatchToProps = dispatch => ({
+
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(SeatPlanner);

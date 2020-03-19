@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Button, Form, Col, Row } from 'react-bootstrap';
 import SeatPicker from 'react-seat-picker'
-import { BASE_URL } from './Config'
+import { BASE_URL } from '../Config'
 import { ToastsStore } from 'react-toasts';
 import { Redirect } from 'react-router-dom';
 export default class SeatPlanner extends Component {

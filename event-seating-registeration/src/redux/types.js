@@ -1,0 +1,1 @@
+export const SET_SELECTED_EVENT = "SET_SELECTED_EVENT";

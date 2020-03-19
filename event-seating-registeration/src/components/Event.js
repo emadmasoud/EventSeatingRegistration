@@ -2,8 +2,7 @@ import React, { Component } from 'react'
 
 import { Card, Image, Icon, Container, Grid, GridRow, GridColumn } from 'semantic-ui-react';
 import SeatPicker from './SeatPicker';
-import axios from 'axios';
-import { BASE_URL } from './Config'
+
 import { Redirect } from 'react-router-dom';
 export default class EventList extends Component {
     constructor(props) {
