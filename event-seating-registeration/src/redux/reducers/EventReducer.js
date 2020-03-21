@@ -16,6 +16,7 @@ export default function(
     switch (action.type) {
       case SET_SELECTED_EVENT:
         clone.selected = action.payload;
+        localStorage.setItem('selected_event', JSON.stringify(action.payload))
         return clone;
   
     }

@@ -5,13 +5,15 @@ import { ToastsStore } from 'react-toasts';
 import axios from 'axios';
 import { BASE_URL } from '../Config'
 import {connect} from 'react-redux';
+import DataService from "../services/dataService";
 class SeatPlanner extends Component {
   constructor(props) {
     super(props);
+    let eventLS = JSON.parse(localStorage.getItem('selected_event'));
     this.state = {
       loading: false,
-      event: this.props.selected_event,
-      tables_list: this.props.selected_event.tables_list,
+      event: this.props.selected_event? this.props.selected_event: eventLS,
+      tables_list: this.props.selected_event? this.props.selected_event.tables_list : eventLS.tables_list,
       selectedTablesCount: 0,
       selectedTables: [],
       maxReservableTables: this.props.paidTablesCount ? this.props.paidTablesCount : 3,
@@ -23,35 +25,8 @@ class SeatPlanner extends Component {
         'E': [6, 7, 7]
       }
     }
-
-   
   }
   
-  componentDidMount() {
-
-    // this.getAllTables();
-    // let t_list = []
-
-
-    // for (var i = 1; i <= 20; i++) {
-    //   t_list.push({ id: i, number: `${i}-E`, tooltip: `Table ${i} from Area E`, isReserved: false, area: 'E' })
-    // }
-    // for (var i = 1; i <= 20; i++) {
-    //   t_list.push({ id: i, number:`${i}-B`, tooltip: `Table ${i} from Area B`, isReserved: false, area: 'B' })
-    // }
-    // for (var i = 1; i <= 20; i++) {
-    //   t_list.push({ id: i, number: `${i}-C`, tooltip: `Table ${i} from Area C`, isReserved: false, area: 'C' })
-    // }
-    // for (var i = 1; i <= 40; i++) {
-    //   t_list.push({ id: i, number: `${i}-A`, tooltip: `Table ${i} from Area A`, isReserved: true, area: 'A' })
-    // }
-
-
-    //    for (var i = 1; i <= 20; i++) {
-    //   t_list.push({  id: i,  event_id: 1, number: `${i}-D`, tooltip: `Table ${i} from Area D`, isReserved: false, area: 'D' })
-    // }
-    // this.setState({ tables_list: t_list })
-  }
 
   addSeatCallback = ({ row, number, id }, addCb) => {
 
@@ -123,8 +98,31 @@ class SeatPlanner extends Component {
         })
       // }
     }
-
     return finalTableMap;
+  }
+
+
+  checkout = () => {
+    let toBeReservedTableList = []
+    toBeReservedTableList = this.state.selectedTables.map(st =>{
+      var obj = {
+        event_id: this.state.event.id, 
+        user_id: this.props.user_id? this.props.user_id: 1, 
+        table_id: st['id'], 
+        number: st['number'], 
+        area: st['number'].split('-')[1]
+      }
+      return obj;
+    })
+    var data = {
+      eventID: this.state.event.id,
+      tables: toBeReservedTableList
+    }
+    console.log(data)
+    DataService.Instance.reserveTables(data).then(data=>{        
+      ToastsStore.success("Reservation Complated");
+    });    
+
   }
 
   render() {
@@ -142,6 +140,8 @@ class SeatPlanner extends Component {
     const { loading } = this.state
 
     return (
+      <div>
+<button onClick={this.checkout}> Checkout </button>
       <div className="seat-picker-container">
         <Row>
           <Col>Available Tables <span className="available-seats-color-hint"></span></Col>
@@ -238,7 +238,7 @@ class SeatPlanner extends Component {
         </div>
 
 
-
+        </div>
       </div>
     )
   }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Grid } from 'semantic-ui-react';
+import { Grid } from 'semantic-ui-react'; 
 import Event from './Event';
 import { connect } from "react-redux";
 import DataService from "../services/dataService";

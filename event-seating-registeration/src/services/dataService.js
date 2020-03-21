@@ -55,6 +55,22 @@ export class DataService {
 
     }
 
+    reserveTables(data){
+        try {
+            return axios.post(BASE_URL + "reserveTables", data).then(response => {
+                if (response.data.success) {
+                    console.log("SUCCCCESSS")
+                   return []
+                }
+            }).catch(err => {
+                return []
+            })
+        }
+        catch (err) {
+            return []
+        }
+
+    }
 
 }
 
