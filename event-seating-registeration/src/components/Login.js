@@ -79,7 +79,10 @@ export default class LoginForm extends Component {
               onChange={this.onFormValueChangeHandler} />
           </div>
         </Col>
-        <Col>
+       
+      </Row>
+      <Row>
+      <Col>
           <div className="form-group">
             <label>Password</label>
             <input type="password"
@@ -93,8 +96,7 @@ export default class LoginForm extends Component {
 
 
         </Col>
-      </Row>
-    
+        </Row>
 
 
       <button type="submit" className="btn btn-primary btn-block mt-3"  onClick={this.registerUser}>Login</button>
