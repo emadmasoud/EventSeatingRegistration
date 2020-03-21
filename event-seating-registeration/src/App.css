@@ -86,7 +86,7 @@ body, html, .App, #root, .auth-wrapper {
 .seat-picker-container{
   width: 95%;
   margin: auto;
-  margin-top:30px;
+  margin-top:20px;
   margin-bottom:30px;
   background: #ffffff;
   box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
@@ -174,5 +174,10 @@ body, html, .App, #root, .auth-wrapper {
   -webkit-box-shadow: 0 10px 10px #777;
   -moz-box-shadow: 0 10px 10px #777;
   box-shadow: 0 10px 10px #777;
+}
+
+.clickable{
+  color: #167bff;
+  cursor: pointer;
 }
 

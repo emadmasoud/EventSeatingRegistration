@@ -6,17 +6,19 @@ import axios from 'axios';
 import { BASE_URL } from '../Config'
 import {connect} from 'react-redux';
 import DataService from "../services/dataService";
+import Header from './Header';
 class SeatPlanner extends Component {
   constructor(props) {
     super(props);
     let eventLS = JSON.parse(localStorage.getItem('selected_event'));
+    let user = JSON.parse(sessionStorage.getItem('user'));
     this.state = {
       loading: false,
       event: this.props.selected_event? this.props.selected_event: eventLS,
       tables_list: this.props.selected_event? this.props.selected_event.tables_list : eventLS.tables_list,
       selectedTablesCount: 0,
       selectedTables: [],
-      maxReservableTables: this.props.paidTablesCount ? this.props.paidTablesCount : 3,
+      maxReservableTables: user.user.paid_tables ? user.user.paid_tables : 0,
       rowCountPerArea: {
         'A': [8],
         'B': [4],
@@ -103,11 +105,12 @@ class SeatPlanner extends Component {
 
 
   checkout = () => {
+    let user = JSON.parse(sessionStorage.getItem("user"));
     let toBeReservedTableList = []
     toBeReservedTableList = this.state.selectedTables.map(st =>{
       var obj = {
         event_id: this.state.event.id, 
-        user_id: this.props.user_id? this.props.user_id: 1, 
+        user_id: user.user.id,
         table_id: st['id'], 
         number: st['number'], 
         area: st['number'].split('-')[1]
@@ -120,9 +123,22 @@ class SeatPlanner extends Component {
     }
     console.log(data)
     DataService.Instance.reserveTables(data).then(data=>{        
-      ToastsStore.success("Reservation Complated");
+      ToastsStore.success("Reservation Completed");
+      this.props.history.push("/events")
     });    
 
+  }
+
+  componentWillMount(){
+
+    let user =  JSON.parse(sessionStorage.getItem("user")).user;
+    DataService.Instance.getPaidTablesInfo(user.id, this.state.event.id).then(paidTables=>{
+      this.setState({maxReservableTables: paidTables});
+    })
+    if(!user)
+    {
+        this.props.history.push("/login");
+    }
   }
 
   render() {
@@ -136,19 +152,21 @@ class SeatPlanner extends Component {
 
     let rowsE = this.getAlignedTables("E", this.state.tables_list)
 
-    console.log("render---------------------", this.state.event)
     const { loading } = this.state
 
     return (
       <div>
-<button onClick={this.checkout}> Checkout </button>
+          <Header></Header>
+        
+        
       <div className="seat-picker-container">
         <Row>
           <Col>Available Tables <span className="available-seats-color-hint"></span></Col>
           <Col>Reserved Tables <span className="reserved-seats-color-hint"></span></Col>
           <Col>Selected Tables <span className="selected-seats-color-hint"></span></Col>
           <Col>You can select only {this.state.maxReservableTables - this.state.selectedTablesCount}  tables</Col>
-
+       
+         
         </Row>
         <hr />
         <div className="container">
@@ -237,7 +255,10 @@ class SeatPlanner extends Component {
           </Row>
         </div>
 
-
+<hr/>
+        <div className="m-3">
+          <button className="btn btn-outline-primary float-right" onClick={this.checkout} disabled={!this.state.maxReservableTables}> Confirm </button>
+          </div>
         </div>
       </div>
     )

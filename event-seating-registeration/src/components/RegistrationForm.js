@@ -4,7 +4,9 @@ import SeatPicker from 'react-seat-picker'
 import { BASE_URL } from '../Config'
 import { ToastsStore } from 'react-toasts';
 import { Redirect } from 'react-router-dom';
-export default class SeatPlanner extends Component {
+import DataService from '../services/dataService';
+import axios from 'axios';
+export default class RegistrationForm extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -18,10 +20,21 @@ export default class SeatPlanner extends Component {
       class_no: 'MBA2018',
       agreed: false,
       password_error_class: '',
-      showSeatPickerButton: false
+      showSeatPickerButton: false,
+      classOptionsList: []
     }
   }
+  componentDidMount()
+  {
+    this.getClassOptionsList();
+  }
 
+getClassOptionsList(){
+  DataService.Instance.getClasses().then(classes=>{
+    console.log(classes,"classes")
+    this.setState({classOptionsList: classes.data})
+  })
+}
 
   onFormValueChangeHandler = (e) => {
     let text = e.target.type != "checkbox" ? e.target.value : e.target.checked;
@@ -49,25 +62,19 @@ export default class SeatPlanner extends Component {
       password: this.state.password
 
     };
-    fetch(BASE_URL + "register", {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-
-      },
-      method: "POST",
-      body: JSON.stringify(user)
-    }).then(data => {
+    axios.post(BASE_URL + "register", 
+     user).then(data => {
       console.log(data)
-      if (data.status == 200) {
-        ToastsStore.success("Successfully Registered!")
-        this.setState({ showSeatPickerButton: true })
+      if (data.data.success) {
+        ToastsStore.success("Successfully Registered! Please Login")
+        this.props.history.push("/login");
       }
       else {
-        ToastsStore.error("Something went wrong! Try Again..")
+        ToastsStore.error(data.data.message)
         this.setState({ showSeatPickerButton: false })
       }
     }).catch(err => {
+      console.log(err)
       ToastsStore.error("Something went wrong! Try Again..")
       this.setState({ showSeatPickerButton: false })
     })
@@ -75,7 +82,7 @@ export default class SeatPlanner extends Component {
 
   
   goToTablePage = e =>{
-    return <Redirect to="/seatPicker"></Redirect>
+    // return <Redirect to="/seatPicker"></Redirect>
   }
 
   registrationForm(){
@@ -161,8 +168,9 @@ export default class SeatPlanner extends Component {
               onChange={this.onFormValueChangeHandler}
             >
 
-              <option value="MBA2018">MBA2018</option>
-              <option value="Economic">Economic</option>
+            {this.state.classOptionsList.map(op=>{
+              return <option value={op}>{op}</option>
+            })}
             </select>
           </div>
 
@@ -214,7 +222,7 @@ export default class SeatPlanner extends Component {
 
       <button type="submit" className="btn btn-primary btn-block mt-3" disabled={(!this.state.agreed || this.state.password_error_class != '')} onClick={this.registerUser}>Register</button>
       <p className="forgot-password text-right">
-        Already registered <a href="#">sign in?</a>
+        Already registered <span className="clickable" onClick={()=> this.props.history.push("/login")}>sign in?</span>
       </p>
     </form>
 
@@ -223,7 +231,7 @@ export default class SeatPlanner extends Component {
 
 
   render() {
-    const pageContent = !this.state.showSeatPickerButton ? this.registrationForm():this.goToTablePage();
+    const pageContent =  this.registrationForm();
 
     return (
       <div>

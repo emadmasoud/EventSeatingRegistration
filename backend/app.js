@@ -44,15 +44,89 @@ app.get('/events', (req, res) => {
     })
 });
 
+app.get('/getClasses', (req, res) => {
+var list = [];
+
+    var cep ="CEP";
+    var omp ="OMP";
+    var amp ="AMP";
+    var smp ="SMP";
+    var map ="MAP";
+    var agmp ="AgMP";
+    var emba ="EMBA";
+    var ftmba ="FTMBA";
+    var memba ="MEMBA";
+
+    for(var i=1;i<=27;i++)
+        list.push(`${cep}${i}`);
+
+    for(var i=1;i<=30;i++)
+        list.push(`${omp}${i}`);
+
+    for(var i=1;i<=30;i++)
+        list.push(`${amp}${i}`);
+
+    for(var i=1;i<=75;i++)
+        list.push(`${smp}${i}`);
+
+    for(var i=1;i<=10;i++)
+        list.push(`${map}${i}`);
+
+    for(var i=1;i<=15;i++)
+        list.push(`${agmp}${i}`);
+
+    for(var i=1;i<=25;i++)
+        list.push(`${emba}${i}`);
+
+    for(var i=1;i<=19;i++)
+        list.push(`${ftmba}${i}`);
+
+    for(var i=1;i<=9;i++)
+        list.push(`${memba}${i}`);
+    
+
+  return res.json(list);
+});
+
 app.post('/register', (req, res) => {
     var user = req.body;
-    mysqlConnection.query(`INSERT into user (first_name, middle_name, last_name, email, phone, class) VALUES ('${user.first_name}','${user.middle_name}','${user.last_name}','${user.email}','${user.phone}','${user.class_no}')`
-        , (err, rows, fields) => {
-            if (!err)
-                res.json({ success: true, data: rows });
+    var email = user.email;
+    isUserExist(email).then(obj=>{
+        if(!obj.exist)
+        {
+            mysqlConnection.query(`INSERT into user (first_name, middle_name, last_name, email, phone, class, password) VALUES ('${user.first_name}','${user.middle_name}','${user.last_name}','${user.email}','${user.phone}','${user.class_no}', '${user.password}')`
+            , (err, rows, fields) => {
+                if (!err)
+                    res.json({ success: true, data: rows, message:"User Registered Successfully" }, status=200);
+                else
+                    res.json({ success: false, data: err });
+            })
+        }else
+        {
+            res.json({ success: false, data: {}, message:"This email is already registered with our site" });
+        }
+    });
+    
+ 
+});
+app.post('/login', (req, res) => {
+    var user = req.body;
+    var email = user.email;
+    isUserExist(email).then(obj=>{
+        if(!obj.exist)
+        {
+            res.json({ success: false, data: {}, message:"This email is not registered with our site" });
+        }else
+        {
+            console.log(obj)
+            if(obj.user.password == user.password)
+                res.json({ success: true, data:obj, message:"Logged in" });
             else
-                res.json({ success: false, data: err });
-        })
+                res.json({ success: false, data: {}, message:"Wrong Password" });
+        }
+    });
+    
+ 
 });
 
 app.get('/getPrivacyPolicyText', (req, res) => {
@@ -88,12 +162,19 @@ app.post('/reserveTables', (req, res) => {
     console.log("here")
     if (req.body['eventID']) {
         var eventID = req.body['eventID'];
+        var userID  = req.body['tables'][0].user_id;
         createBulkReservations(req.body.tables).then(data => {
             updateTablesStatus(req.body.tables).then(data => {
-                mysqlConnection.query(`SELECT * FROM tables WHERE event_id=${eventID}`, (err, rows, fields) => {
+                mysqlConnection.query(`SELECT * FROM event_registrations WHERE event_id=${eventID}`, (err, rows, fields) => {
                     if (!err) {
-
-                        res.json({ success: true, data: rows, message: "Successfully Retreived" });
+                        updateEventTableCount(eventID, rows.length)
+                        updatePaidTablesCount(eventID, userID, req.body.tables.length).then(data =>{
+                            console.log(data, '--------------------')
+                            return res.json({ success: true, data: rows, message: "Successfully Retreived" });
+                        }).catch(err=>{
+                            console.log(err, '--------------------')
+                        })
+                       
                     }
                     else
                         return res.json({ success: false, data: [], message: "Something wrong happened" })
@@ -111,6 +192,19 @@ app.post('/reserveTables', (req, res) => {
 
 });
 
+app.post('/getPaidTablesInfo', (req, res) => {
+    var info = req.body;
+    console.log(info)
+    mysqlConnection.query(`SELECT * from user_registration_payment where user_id=${info.userID} and event_id=${info.eventID}`, (err, rows, fields)=>{
+        if(!err && rows.length)
+            return res.json({success: true, data: rows[0].paid_tables});
+        else
+            return res.json({success: false, data: 0});
+        
+        console.log(err, "paid")
+       
+    })
+})
 app.post('/createEvent', (req, res) => {
     var event = req.body;
     mysqlConnection.query(`INSERT into event (name, location, date, time, expiration_date, no_of_tables, cost_per_table) VALUES ('${event.name}','${event.location}','${event.date}','${event.time}','${event.expiration_date}','${event.no_of_tables}','${event.cost_per_table}')`
@@ -147,10 +241,7 @@ createTablesForEvent = (eventId) => {
 
     mysqlConnection.query(sql, [t_list], function (err) {
         if (err) throw err;
-        {
-            console.log(err, "--------------------")
-            mysqlConnection.end();
-        }
+      
     });
 }
 
@@ -196,5 +287,65 @@ updateTablesStatus = (tables) => {
     });
 }
 
+updateEventTableCount = (eventID, reservedTablesCountTotal) =>{
+    mysqlConnection.query(`SELECT * FROM event WHERE id=${eventID}`, (err, rows, fields) => {
+        if (!err) {
+            var info = rows[0];
+            var leftCount = info.no_of_tables - reservedTablesCountTotal;
+            mysqlConnection.query(`UPDATE event set available_tables = ${leftCount}  WHERE id=${eventID}`, (err, rows, fields) => {
+                if(!err)
+                    {
+                        console.log(rows)
+                    }
+                    else
+                    {
+                        console.log(err)
+                    }
+            });
+        }
+    })
+}
+updatePaidTablesCount = (eventID, userID, paidCount) =>{
+    console.log(eventID, userID, paidCount, "LEFT TABLES PAIDDDDDDDDDDDD")
+    return new Promise((resolve, reject)=>{
+        mysqlConnection.query(`SELECT * from user_registration_payment where user_id=${userID} and event_id=${eventID}`, (err, rows, fields) => {
+            if (!err && rows.length) {
+                var info = rows[0];
+                var leftCount = info.paid_tables - paidCount;
+                console.log(leftCount, "LEFT TABLES PAIDDDDDDDDDDDD")
+                mysqlConnection.query(`UPDATE user_registration_payment set paid_tables = ${leftCount}  WHERE user_id=${userID} and event_id=${eventID}`, (err, rows, fields) => {
+                    if(!err)
+                        {
+                           resolve(true)
+                        }
+                        else
+                        {
+                            reject(false)
+                        }
+                });
+            }
+        })
+    })
+   
+}
+
+isUserExist = (email) => {
+    return new Promise((resolve, reject)=>{
+        var sql = `SELECT * from user where email='${email}'`;
+
+        mysqlConnection.query(sql, (err, rows, fields) => {
+            if (!err && rows.length)
+            {
+                let userObj = rows[0];
+                resolve({exist:true, user: userObj})
+             
+                
+            }          
+            else
+                resolve({exist:false})
+        })
+    })
+  
+}
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}..`));

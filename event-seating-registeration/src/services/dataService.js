@@ -45,7 +45,7 @@ export class DataService {
                         ele['isReserved'] = ele['isReserved'] == 0 ? false : true;
                         return ele;
                     })
-                   return t_list
+                   return t_list;
                 }
             })
         }
@@ -70,6 +70,20 @@ export class DataService {
             return []
         }
 
+    }
+
+    getClasses(){
+        return axios.get(BASE_URL+"getClasses").then(response=>{          
+                return response;          
+        })
+    }
+
+    getPaidTablesInfo(userID, eventID)
+    {
+        return axios.post(BASE_URL+"getPaidTablesInfo", {userID, eventID}).then(response=>{
+            console.log(response, "paid")
+            return response.data.data;
+        })
     }
 
 }

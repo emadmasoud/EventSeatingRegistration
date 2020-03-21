@@ -4,6 +4,7 @@ import Event from './Event';
 import { connect } from "react-redux";
 import DataService from "../services/dataService";
 import { selectEvent } from '../redux/actions/EventActions';
+import Header from './Header';
 class EventList extends Component {
     constructor(props) {
         super(props);    
@@ -15,14 +16,23 @@ class EventList extends Component {
 
 
     componentWillReceiveProps(nextProps) {
+
         if (nextProps.selected_event != null)
             this.props.history.push('/seatPicker');
     }
 
     componentWillMount() {
+       let user =  sessionStorage.getItem("user");
+       if(!user)
+       {
+           this.props.history.push("/login");
+       }else
+       {
         DataService.Instance.fetchEvents().then(data=>{        
             this.setState({eventsList: data})
-       });    
+       });  
+       }
+       
           
     }
 
@@ -41,6 +51,7 @@ class EventList extends Component {
     render() {
         return (
             <div className="">
+                <Header></Header>
                 <Grid className="justify-content-center">
                     {this.state.selected_event == null &&
                         this.state.eventsList.map(event => {

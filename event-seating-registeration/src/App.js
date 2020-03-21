@@ -8,15 +8,17 @@ import TermsAndCondition from "./components/TermsAndCondition";
 import SeatPicker from "./components/SeatPicker";
 import EventList from "./components/EventList";
 import { ToastsContainer, ToastsStore } from 'react-toasts';
+import LoginForm from './components/Login';
+import Header  from './components/Header';
 
 function App() {
   return (
   <Router>
     <div className="App">
      <ToastsContainer store={ToastsStore}></ToastsContainer>
-
      <Switch>
      <Route exact path='/' component={TermsAndCondition} />
+   
      <Route exact path="/events" component={EventList} />   
      <Route exact path="/seatPicker" component={SeatPicker}  />    
     
@@ -25,6 +27,7 @@ function App() {
       
         <div className="auth-inner">              
         <Route exact path="/register" component={RegistrationForm} />      
+        <Route exact path="/login" component={LoginForm} />      
         </div>   
       </div>
      

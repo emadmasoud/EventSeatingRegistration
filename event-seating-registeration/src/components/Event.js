@@ -30,7 +30,7 @@ export default class EventList extends Component {
                 <Card.Content extra>
                     <a>
                         <Icon name='table' />
-                        {this.props.event.no_of_tables} Tables available
+                        {this.props.event.available_tables} Tables available out of {this.props.event.no_of_tables}
                       </a>
                 </Card.Content>
             </Card></GridColumn>
