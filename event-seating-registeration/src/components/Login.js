@@ -97,7 +97,7 @@ export default class LoginForm extends Component {
     
 
 
-      <button type="submit" className="btn btn-primary btn-block mt-3"  onClick={this.registerUser}>Login</button>
+      <button type="submit" className="btn btn-primary btn-block mt-3"  disabled={this.state.email=='' && this.state.password==''} onClick={this.registerUser}>Login</button>
       <p className="forgot-password text-right">
         No Account?  <span className="clickable" onClick={()=> this.props.history.push("/register")}>sign up?</span>
       </p>

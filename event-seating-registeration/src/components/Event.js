@@ -12,7 +12,7 @@ export default class EventList extends Component {
 
     render() {
 
-
+        let date = new Date(this.props.event.date);
         return (
             <GridColumn onClick={()=>this.props.goToTablePicker(this.props.event)}>
                 <Card >
@@ -20,7 +20,7 @@ export default class EventList extends Component {
                 <Card.Content>
                     <Card.Header>{this.props.event.name}</Card.Header>
                     <hr />
-                    <Card.Meta>Date:  {this.props.event.date}</Card.Meta>
+                    <Card.Meta>Date:  {date.toLocaleDateString("en-US")}</Card.Meta>
                     <Card.Meta>Time:  {this.props.event.time}</Card.Meta>
                     <Card.Meta>Location: {this.props.event.location}</Card.Meta>
                     <Card.Description>
