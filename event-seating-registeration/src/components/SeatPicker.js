@@ -7,6 +7,9 @@ import { BASE_URL } from '../Config'
 import {connect} from 'react-redux';
 import DataService from "../services/dataService";
 import Header from './Header';
+import Loader from 'react-loader-spinner'
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css"
+
 class SeatPlanner extends Component {
   constructor(props) {
     super(props);
@@ -121,6 +124,13 @@ class SeatPlanner extends Component {
       }
       return obj;
     })
+
+    if(!toBeReservedTableList.length)
+    {
+        ToastsStore.warning("You can't proceed without selecting any table.")
+        return;
+    }
+
     var data = {
       eventID: this.state.event.id,
       tables: toBeReservedTableList
@@ -162,7 +172,7 @@ class SeatPlanner extends Component {
       <div>
           <Header></Header>
         
-        
+     
       <div className="seat-picker-container">
         <Row>
           <Col>Available Tables <span className="available-seats-color-hint"></span></Col>
