@@ -53,13 +53,17 @@ class SeatPlanner extends Component {
   removeSeatCallback = ({ row, number, id }, removeCb) => {
 
     let totalTables = this.state.selectedTablesCount - 1;
+    let selectedTables = this.state.selectedTables;
     if (totalTables < 0)
       totalTables = 0;
     // await new Promise(resolve => setTimeout(resolve, 1500))
     console.log(`Removed seat ${number}, row ${row}, id ${id}`)
 
     removeCb(row, number)
-    this.setState({ loading: false, selectedTablesCount: totalTables })
+    let idx = this.state.selectedTables.findIndex(d=>{ return d.id == id});
+    selectedTables.splice(idx,1);
+    console.log(selectedTables,idx,  "selected")
+    this.setState({ loading: false, selectedTablesCount: totalTables, selectedTables: selectedTables })
 
   }
 
