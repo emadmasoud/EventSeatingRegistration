@@ -6,6 +6,8 @@ import { ToastsStore } from 'react-toasts';
 import { Redirect } from 'react-router-dom';
 import DataService from '../services/dataService';
 import axios from 'axios';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css'
 export default class RegistrationForm extends Component {
   constructor(props) {
     super(props)
@@ -21,221 +23,292 @@ export default class RegistrationForm extends Component {
       agreed: false,
       password_error_class: '',
       showSeatPickerButton: false,
-      classOptionsList: []
+      classOptionsList: [],
+
+      first_name_error: '',
+      middle_name_error: '',
+      last_name_error: '',
+      phone_error: '',
+      email_error: '',
+      password_error: ''
     }
   }
-  componentDidMount()
-  {
+  componentDidMount() {
     this.getClassOptionsList();
   }
 
-getClassOptionsList(){
-  DataService.Instance.getClasses().then(classes=>{
-    console.log(classes,"classes")
-    this.setState({classOptionsList: classes.data})
-  })
-}
 
-  onFormValueChangeHandler = (e) => {
-    let text = e.target.type != "checkbox" ? e.target.value : e.target.checked;
-    let name = e.target.name;
+  isValid = text => {
+    text = text.trim()
+    return text != '' && text != null && text != undefined;
+  }
+
+  getClassOptionsList() {
+    DataService.Instance.getClasses().then(classes => {
+      console.log(classes, "classes")
+      this.setState({ classOptionsList: classes.data })
+    })
+  }
+
+  validate(text, name, isCheckbox)
+  {
     let error_msg = this.state.password_error_class
-    console.log(name, text, e)
+
+    if (name == "password" && /\s/.test(text))
+    {
+      let variable = `${name}_error`;
+      this.setState({ [variable]: "Password cant contain space" })
+    }
+    else if (!isCheckbox && !this.isValid(text)) {
+      let variable = `${name}_error`;
+      this.setState({ [variable]: "This field is required" })
+    }
+    else {
+      let variable = `${name}_error`;
+      this.setState({ [variable]: "" })
+    }
+
     if ((name == "c_password" && text != this.state.password) || (name == "password" && text != this.state.c_password)) {
       error_msg = 'is-invalid'
     }
     else {
       error_msg = ''
     }
-    this.setState({ [name]: text, password_error_class: error_msg });
+    this.setState({password_error_class: error_msg });
   }
+
+  onFormValueChangeHandler = (e) => {
+    let text = e.target.type != "checkbox" ? e.target.value : e.target.checked;
+    let name = e.target.name; 
+    let isCheckbox = e.target.type != "checkbox" ? false : true;
+    this.validate(text, name, isCheckbox)
+    this.setState({ [name]: text });
+  }
+
+  checkValidations = () => {
+    var { first_name_error, middle_name_error, last_name_error, phone_error, email_error, password_error } = this.state;
+    if (first_name_error == "" &&
+      middle_name_error == "" &&
+      last_name_error == "" &&
+      phone_error == "" &&
+      email_error == "" &&
+      password_error == "") {
+
+      var { first_name, middle_name, last_name, phone, email, password, c_password } = this.state;
+      if (first_name.trim() != "" &&
+        middle_name.trim() != "" &&
+        last_name.trim() != "" &&
+        phone.trim() != "" &&
+        email.trim() != "" &&
+        password.trim() != "" && c_password != "") {
+        return true;
+      }
+      return false;
+    }
+    return false;
+  }
+
 
   registerUser = e => {
     e.preventDefault();
+    if (!this.checkValidations()) {
+      ToastsStore.warning("Enter the required fields please.")
+      return;
+    }
+
     let user = {
-      first_name: this.state.first_name,
-      middle_name: this.state.middle_name,
-      last_name: this.state.last_name,
-      class_no: this.state.class_no,
-      email: this.state.email,
-      phone: this.state.phone,
-      password: this.state.password
+      first_name: this.state.first_name.trim(),
+      middle_name: this.state.middle_name.trim(),
+      last_name: this.state.last_name.trim(),
+      class_no: this.state.class_no.trim(),
+      email: this.state.email.trim(),
+      phone: this.state.phone.trim(),
+      password: this.state.password.trim()
 
     };
-    axios.post(BASE_URL + "register", 
-     user).then(data => {
-      console.log(data)
-      if (data.data.success) {
-        ToastsStore.success("Successfully Registered! Please Login")
-        this.props.history.push("/login");
-      }
-      else {
-        ToastsStore.error(data.data.message)
+    axios.post(BASE_URL + "register",
+      user).then(data => {
+        console.log(data)
+        if (data.data.success) {
+          ToastsStore.success("Successfully Registered! Please Login")
+          this.props.history.push("/login");
+        }
+        else {
+          ToastsStore.error(data.data.message)
+          this.setState({ showSeatPickerButton: false })
+        }
+      }).catch(err => {
+        console.log(err)
+        ToastsStore.error("Something went wrong! Try Again..")
         this.setState({ showSeatPickerButton: false })
-      }
-    }).catch(err => {
-      console.log(err)
-      ToastsStore.error("Something went wrong! Try Again..")
-      this.setState({ showSeatPickerButton: false })
-    })
+      })
   }
 
-  
-  goToTablePage = e =>{
-    // return <Redirect to="/seatPicker"></Redirect>
-  }
-
-  registrationForm(){
-   return  <div>
-    <form>
-      <h3>Sign Up</h3>
-
-      <Row>
-        <Col>
-          <div className="form-group">
-            <label>First name</label>
-            <input type="text"
-              required
-              className="form-control"
-              placeholder="First name"
-              value={this.state.first_name}
-              name='first_name'
-              onChange={this.onFormValueChangeHandler} />
-          </div>
-        </Col>
-        <Col>
-          <div className="form-group">
-            <label>Middle name</label>
-            <input type="text"
-              required
-              className="form-control"
-              placeholder="Middle name"
-              value={this.state.middle_name}
-              name='middle_name'
-              onChange={this.onFormValueChangeHandler} />
-          </div>
-        </Col>
-        <Col>
-          <div className="form-group">
-            <label>Last name</label>
-            <input type="text"
-              required
-              className="form-control"
-              placeholder="Last name"
-              value={this.state.last_name}
-              name='last_name'
-              onChange={this.onFormValueChangeHandler} />
-          </div>
-        </Col>
-      </Row>
 
 
-      <Row>
-        <Col>
-          <div className="form-group">
-            <label>Email address</label>
-            <input type="email"
-              required
-              className="form-control"
-              placeholder="Enter email"
-              value={this.state.email}
-              name='email'
-              onChange={this.onFormValueChangeHandler} />
-          </div>
-        </Col>
-        <Col>
-          <div className="form-group">
-            <label>Phone No.</label>
-            <input type="number"
-              required
-              className="form-control"
-              placeholder="Enter phone number"
-              value={this.state.phone}
-              name='phone'
-              onChange={this.onFormValueChangeHandler} />
-          </div>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <div className="form-group">
-            <label>Class</label>
-            <select
-              required
-              className="form-control"
-              name='class_no'
-              value={this.state.class_no}
-              onChange={this.onFormValueChangeHandler}
-            >
+  registrationForm() {
+    return <div>
+      <form>
+        <h3>Sign Up</h3>
 
-            {this.state.classOptionsList.map(op=>{
-              return <option value={op}>{op}</option>
-            })}
-            </select>
-          </div>
-
-
-        </Col>
-      </Row>
-
-      <Row>
-        <Col>
-          <div className="form-group">
-            <label>Password</label>
-            <input type="password"
-              required
-              className={"form-control " + this.state.password_error_class}
-              placeholder="Enter password"
-              value={this.state.password}
-              name='password'
-              onChange={this.onFormValueChangeHandler} />
-          </div>
+        <Row>
+          <Col>
+            <div className="form-group">
+              <label>First name</label>
+              <span class="required">*</span>
+              <input type="text"
+                required
+                className="form-control"
+                placeholder="First name"
+                value={this.state.first_name}
+                name='first_name'
+                onChange={this.onFormValueChangeHandler} />
+              <div class="required small">{this.state.first_name_error}</div>
+            </div>
+          </Col>
+          <Col>
+            <div className="form-group">
+              <label>Middle name</label>
+              <span class="required">*</span>
+              <input type="text"
+                required
+                className="form-control"
+                placeholder="Middle name"
+                value={this.state.middle_name}
+                name='middle_name'
+                onChange={this.onFormValueChangeHandler} />
+              <div class="required small">{this.state.middle_name_error}</div>
+            </div>
+          </Col>
+          <Col>
+            <div className="form-group">
+              <label>Last name</label>
+              <span class="required">*</span>
+              <input type="text"
+                required
+                className="form-control"
+                placeholder="Last name"
+                value={this.state.last_name}
+                name='last_name'
+                onChange={this.onFormValueChangeHandler} />
+              <div class="required small">{this.state.last_name_error}</div>
+            </div>
+          </Col>
+        </Row>
 
 
-        </Col>
-        <Col>
-          <div className="form-group">
-            <label>Confirm Password</label>
-            <input type="password"
-              required
-              className={"form-control " + this.state.password_error_class}
-              placeholder="Enter password"
-              value={this.state.c_password}
-              name='c_password'
-              onChange={this.onFormValueChangeHandler}
-            />
-          </div>
-        </Col>
-      </Row>
+        <Row>
+          <Col>
+            <div className="form-group">
+              <label>Email address</label>
+              <span class="required">*</span>
+              <input type="email"
+                required
+                className="form-control"
+                placeholder="Enter email"
+                value={this.state.email}
+                name='email'
+                onChange={this.onFormValueChangeHandler} />
+              <div class="required small">{this.state.email_error}</div>
+            </div>
+          </Col>
+          <Col>
+            <div className="form-group">
+              <label>Phone No.</label>
+              <span class="required">*</span>
+              <PhoneInput
+                className="form-control"
+                country={'us'}
+                value={this.state.phone}
+                onChange={phone => this.setState({ phone })}
+              />
+              <div class="required small">{this.state.phone_error}</div>
+            </div>
+
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <div className="form-group">
+              <label>Class</label>
+              <span class="required">*</span>
+              <select
+                required
+                className="form-control"
+                name='class_no'
+                value={this.state.class_no}
+                onChange={this.onFormValueChangeHandler}
+              >
+
+                {this.state.classOptionsList.map(op => {
+                  return <option value={op}>{op}</option>
+                })}
+              </select>
+            </div>
 
 
-      <span>
-        <input type="checkbox"
-          required
-          checked={this.state.agreed}
-          name='agreed'
-          onChange={this.onFormValueChangeHandler} />
-        <span className="forgot-password text-left"> I agree to the <a href="#"> Terms & Conditions</a> mentioned by Event Planners</span>
+          </Col>
+        </Row>
 
-      </span>
+        <Row>
+          <Col>
+            <div className="form-group">
+              <label>Password</label>
+              <span class="required">*</span>
+              <input type="password"
+                required
+                className={"form-control " + this.state.password_error_class}
+                placeholder="Enter password"
+                value={this.state.password}
+                name='password'
+                onChange={this.onFormValueChangeHandler} />
+            </div>
+            <div class="required small">{this.state.password_error}</div>
+
+          </Col>
+          <Col>
+            <div className="form-group">
+              <label>Confirm Password</label>
+              <input type="password"
+                required
+                className={"form-control " + this.state.password_error_class}
+                placeholder="Enter password"
+                value={this.state.c_password}
+                name='c_password'
+                onChange={this.onFormValueChangeHandler}
+              />
+            </div>
+          </Col>
+        </Row>
 
 
-      <button type="submit" className="btn btn-primary btn-block mt-3" disabled={(!this.state.agreed || this.state.password_error_class != '')} onClick={this.registerUser}>Register</button>
-      <p className="forgot-password text-right">
-        Already registered <span className="clickable" onClick={()=> this.props.history.push("/login")}>sign in?</span>
-      </p>
-    </form>
+        <span>
+          <input type="checkbox"
+            required
+            checked={this.state.agreed}
+            name='agreed'
+            onChange={this.onFormValueChangeHandler} />
+          <span className="forgot-password text-left"> I agree to the <a href="#"> Terms & Conditions</a> mentioned by Event Planners</span>
 
-  </div>
+        </span>
+
+
+        <button type="submit" className="btn btn-primary btn-block mt-3" disabled={(!this.state.agreed || this.state.password_error_class != '')} onClick={this.registerUser}>Register</button>
+        <p className="forgot-password text-right">
+          Already registered <span className="clickable" onClick={() => this.props.history.push("/login")}>sign in?</span>
+        </p>
+      </form>
+
+    </div>
   }
 
 
   render() {
-    const pageContent =  this.registrationForm();
+    const pageContent = this.registrationForm();
 
     return (
       <div>
-       {pageContent}
+        {pageContent}
       </div>
     )
   }
