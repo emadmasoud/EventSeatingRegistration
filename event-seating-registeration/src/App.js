@@ -10,6 +10,7 @@ import EventList from "./components/EventList";
 import { ToastsContainer, ToastsStore } from 'react-toasts';
 import LoginForm from './components/Login';
 import Header  from './components/Header';
+import { Payment } from './components/Payment';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
    
      <Route exact path="/events" component={EventList} />   
      <Route exact path="/seatPicker" component={SeatPicker}  />    
+     <Route exact path="/payment" component={Payment}  />    
     
       
       <div className="auth-wrapper">

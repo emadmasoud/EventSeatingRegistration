@@ -18,7 +18,7 @@ class EventList extends Component {
     componentWillReceiveProps(nextProps) {
 
         if (nextProps.selected_event != null)
-            this.props.history.push('/seatPicker');
+            this.props.history.push('/payment');
     }
 
     componentWillMount() {
