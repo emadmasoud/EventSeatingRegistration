@@ -2,19 +2,24 @@ const mysql = require('mysql');
 const express = require('express');
 const bodyparser = require('body-parser');
 const cors = require("cors");
+const nodemailer = require("nodemailer");
 const corsOptions = {
     origin: "*", // Or pass origins you want
 };
+require("dotenv").config();
+
 
 var app = express();
 //Configuring express server
 app.use(bodyparser.json());
 app.use(cors(corsOptions));
+
+
 var mysqlConnection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '1234',
-    database: 'eventsregistration',
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password:  process.env.DB_PASSWORD,
+    database:  process.env.DB_DATABASE,
     multipleStatements: true
 });
 
@@ -112,6 +117,11 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
     var user = req.body;
     var email = user.email;
+    sendReservationConfirmationEmail(email).then (()=>{
+
+    }).catch(err=>{
+        console.log(err, "ERROR")
+    })
     isUserExist(email).then(obj=>{
         if(!obj.exist)
         {
@@ -346,6 +356,48 @@ isUserExist = (email) => {
         })
     })
   
+}
+
+
+function sendReservationConfirmationEmail(recepientEmail)
+{
+    return new Promise((resolve, reject) => {
+
+        var bURL = process.env.BASE_URL;
+        console.log(bURL,"PROCESS URL")
+        // test account 
+        nodemailer.createTestAccount().then(testAccount =>{
+            var mailOptions = new Object();
+            mailOptions = {
+                to: recepientEmail,
+                subject: "Reservation Confirmed",
+                html: "<h1>Hello</h1>,<br> You have reserved following tables for event",
+               
+            }
+            var smtpTransport = nodemailer.createTransport({
+                host: "smtp.ethereal.email",
+                port: 587,
+                secure: false, // true for 465, false for other ports
+                auth: {
+                    user: testAccount.user,
+                    pass: testAccount.pass
+                },
+                tls:{
+                    rejectUnauthorized: false
+                }
+            });
+            smtpTransport.sendMail(mailOptions)
+                .then((response) => {
+                    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(response));
+                    resolve(true);
+                }).catch((error) => {
+                   console.log(error, "------------ error");
+                    reject(false);
+                })
+        });
+        // email sending 
+    
+    })
 }
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}..`));
