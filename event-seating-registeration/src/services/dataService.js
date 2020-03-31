@@ -73,15 +73,22 @@ export class DataService {
     }
 
     getClasses(){
-        return axios.get(BASE_URL+"getClasses").then(response=>{          
+        return axios.get(BASE_URL + "getClasses").then(response=>{          
                 return response;          
         })
     }
 
     getPaidTablesInfo(userID, eventID)
     {
-        return axios.post(BASE_URL+"getPaidTablesInfo", {userID, eventID}).then(response=>{
-            console.log(response, "paid")
+        return axios.post(BASE_URL + "getPaidTablesInfo", {userID, eventID}).then(response=>{
+            return response.data.data;
+        })
+    }
+
+    paymentConfirmed(userID, eventID, noOfTables)
+    {
+        let data = {userID, eventID, noOfTables}
+        return axios.post(BASE_URL + "paymentConfirmed", data).then(response=>{
             return response.data.data;
         })
     }

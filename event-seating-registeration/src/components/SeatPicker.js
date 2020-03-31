@@ -2,14 +2,11 @@ import React, { Component } from 'react'
 import { Row, Col } from 'react-bootstrap'
 import SeatPicker from 'react-seat-picker'
 import { ToastsStore } from 'react-toasts';
-import axios from 'axios';
-import { BASE_URL } from '../Config'
 import {connect} from 'react-redux';
 import DataService from "../services/dataService";
 import Header from './Header';
-import Loader from 'react-loader-spinner'
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css"
-
+import swal from 'sweetalert';
 class SeatPlanner extends Component {
   constructor(props) {
     super(props);
@@ -46,7 +43,19 @@ class SeatPlanner extends Component {
       this.setState({ loading: false, selectedTablesCount: totalTables })
     }
     else {
-      ToastsStore.error(`Sorry, You have paid for ${this.state.maxReservableTables} tables only`)
+      // ToastsStore.error(`Sorry, You have paid for ${this.state.maxReservableTables} tables only`)
+      swal({
+        title: "Sorry!",
+        text: "You can't reserve more tables.",
+        icon: "warning",
+     
+      })
+      .then(willDelete => {
+        if (willDelete) {
+          ToastsStore.error(`Pay for tables first to make reservation.`)
+        }
+      });
+
     }
 
   }
@@ -137,8 +146,18 @@ class SeatPlanner extends Component {
     }
     console.log(data)
     DataService.Instance.reserveTables(data).then(data=>{        
-      ToastsStore.success("Reservation Completed");
-      this.props.history.push("/events")
+      swal({
+        title: "Confirmed!",
+        text: "Reservation Completed. Please check your email. We have emailed you the details",
+        icon: "success",
+     
+      })
+      .then(willRedirect => {
+        if (willRedirect) {
+          this.props.history.push("/events")
+        }
+      });
+      
     });    
 
   }
@@ -146,14 +165,23 @@ class SeatPlanner extends Component {
   componentWillMount(){
 
     let user =  JSON.parse(sessionStorage.getItem("user")).user;
-    DataService.Instance.getPaidTablesInfo(user.id, this.state.event.id).then(paidTables=>{
-      this.setState({maxReservableTables: paidTables});
-    })
     if(!user)
     {
         this.props.history.push("/login");
     }
+    else
+    {
+      DataService.Instance.getPaidTablesInfo(user.id, this.state.event.id).then(data=>{
+        this.setState({maxReservableTables: data.paid_tables});
+      })
+    }
   }
+
+  showMyTables = () => {
+    var seats = document.getElementsByClassName("seat--reserved");
+    console.log(seats)
+  }
+
 
   render() {
     let rowsA = this.getAlignedTables("A", this.state.tables_list)
@@ -166,7 +194,7 @@ class SeatPlanner extends Component {
 
     let rowsE = this.getAlignedTables("E", this.state.tables_list)
 
-    const { loading } = this.state
+    console.log(rowsD)
 
     return (
       <div>
@@ -174,6 +202,14 @@ class SeatPlanner extends Component {
         
      
       <div className="seat-picker-container">
+        <Row className="text-center">
+          <Col> <h3>{this.state.event.name}</h3></Col>
+        </Row>
+        <Row className="text-center">
+          <Col> <h5>Here is the visual table map of the venue. Please select the tables to reserve them. Thank You.</h5></Col>
+        </Row>
+        <Row></Row>
+        <hr></hr>
         <Row>
           <Col>Available Tables <span className="available-seats-color-hint"></span></Col>
           <Col>Reserved Tables <span className="reserved-seats-color-hint"></span></Col>

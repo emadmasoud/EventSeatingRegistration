@@ -26,7 +26,6 @@ export default class RegistrationForm extends Component {
       classOptionsList: [],
 
       first_name_error: '',
-      middle_name_error: '',
       last_name_error: '',
       phone_error: '',
       email_error: '',
@@ -50,16 +49,14 @@ export default class RegistrationForm extends Component {
     })
   }
 
-  validate(text, name, isCheckbox)
-  {
+  validate(text, name, isCheckbox) {
     let error_msg = this.state.password_error_class
 
-    if (name == "password" && /\s/.test(text))
-    {
+    if (name == "password" && /\s/.test(text)) {
       let variable = `${name}_error`;
       this.setState({ [variable]: "Password cant contain space" })
     }
-    else if (!isCheckbox && !this.isValid(text)) {
+    else if (!isCheckbox && !this.isValid(text) && name != 'middle_name') {
       let variable = `${name}_error`;
       this.setState({ [variable]: "This field is required" })
     }
@@ -74,12 +71,12 @@ export default class RegistrationForm extends Component {
     else {
       error_msg = ''
     }
-    this.setState({password_error_class: error_msg });
+    this.setState({ password_error_class: error_msg });
   }
 
   onFormValueChangeHandler = (e) => {
     let text = e.target.type != "checkbox" ? e.target.value : e.target.checked;
-    let name = e.target.name; 
+    let name = e.target.name;
     let isCheckbox = e.target.type != "checkbox" ? false : true;
     this.validate(text, name, isCheckbox)
     this.setState({ [name]: text });
@@ -88,7 +85,6 @@ export default class RegistrationForm extends Component {
   checkValidations = () => {
     var { first_name_error, middle_name_error, last_name_error, phone_error, email_error, password_error } = this.state;
     if (first_name_error == "" &&
-      middle_name_error == "" &&
       last_name_error == "" &&
       phone_error == "" &&
       email_error == "" &&
@@ -96,7 +92,6 @@ export default class RegistrationForm extends Component {
 
       var { first_name, middle_name, last_name, phone, email, password, c_password } = this.state;
       if (first_name.trim() != "" &&
-        middle_name.trim() != "" &&
         last_name.trim() != "" &&
         phone.trim() != "" &&
         email.trim() != "" &&
@@ -130,8 +125,23 @@ export default class RegistrationForm extends Component {
       user).then(data => {
         console.log(data)
         if (data.data.success) {
-          ToastsStore.success("Successfully Registered! Please Login")
-          this.props.history.push("/login");
+          axios.post(BASE_URL + "login",
+            user).then(data => {
+              console.log(data)
+              if (data.data.success) {
+                ToastsStore.success("Successfully Logged In!")
+                sessionStorage.setItem("user", JSON.stringify(data.data.data));
+                this.props.history.push("/events");
+              }
+              else {
+                this.setState({ loginClicked: false });
+                ToastsStore.error(data.data.message)
+              }
+            }).catch(err => {
+              console.log(err)
+              this.setState({ loginClicked: false });
+              ToastsStore.error("Something went wrong! Try Again..")
+            })
         }
         else {
           ToastsStore.error(data.data.message)
@@ -169,7 +179,6 @@ export default class RegistrationForm extends Component {
           <Col>
             <div className="form-group">
               <label>Middle name</label>
-              <span class="required">*</span>
               <input type="text"
                 required
                 className="form-control"
@@ -177,7 +186,7 @@ export default class RegistrationForm extends Component {
                 value={this.state.middle_name}
                 name='middle_name'
                 onChange={this.onFormValueChangeHandler} />
-              <div class="required small">{this.state.middle_name_error}</div>
+
             </div>
           </Col>
           <Col>
