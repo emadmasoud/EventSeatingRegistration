@@ -270,22 +270,22 @@ getUserInfo = (userID) => {
 
 }
 createTablesForEvent = (eventId) => {
-    var sql = "INSERT INTO tables (event_id, number, isReserved, area, tooltip) VALUES ?";
+    var sql = "INSERT INTO tables (event_id, number, isReserved, area) VALUES ?";
     var t_list = [];
     for (var i = 1; i <= 20; i++) {
-        t_list.push([eventId.toString(), `${i}-E`, 0, 'E', 'Available'])
+        t_list.push([eventId.toString(), `${i}-E`, 0, 'E'])
     }
     for (var i = 1; i <= 20; i++) {
-        t_list.push([eventId, `${i}-D`, 0, 'D', 'Available'])
+        t_list.push([eventId, `${i}-D`, 0, 'D'])
     }
     for (var i = 1; i <= 20; i++) {
-        t_list.push([eventId, `${i}-C`, 0, 'C', 'Available'])
+        t_list.push([eventId, `${i}-C`, 0, 'C'])
     }
     for (var i = 1; i <= 20; i++) {
-        t_list.push([eventId, `${i}-B`, 0, 'B', 'Available'])
+        t_list.push([eventId, `${i}-B`, 0, 'B'])
     }
     for (var i = 1; i <= 40; i++) {
-        t_list.push([eventId, `${i}-A`, 0, 'A', 'Available'])
+        t_list.push([eventId, `${i}-A`, 0, 'A'])
     }
 
     mysqlConnection.query(sql, [t_list], function (err) {

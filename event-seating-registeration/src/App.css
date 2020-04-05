@@ -194,3 +194,31 @@ body, html, .App, #root, .auth-wrapper {
 .swal-footer{
   text-align: center !important;
 }
+
+.walkway-horizontal
+{
+  margin: 20px;
+}
+.walkway-vertical
+{
+  writing-mode: vertical-rl;
+text-orientation: mixed;
+}
+.dance-floor
+{
+  color: red;
+  margin: 50px;
+}
+.stage
+{
+  height: 60px;
+  border: 5px solid black;
+  width: 150px;
+  text-align: center;
+  padding: 15px;
+  display: inline-block;
+}
+
+.band{
+  float: right;
+}

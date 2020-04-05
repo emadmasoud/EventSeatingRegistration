@@ -238,7 +238,15 @@ class SeatPlanner extends Component {
               </div>
             </Col>
             <Col xs={5}>
-              Stage & Dance Floor
+             
+              <div className="stage">
+              Stage
+              </div>
+              <span className="band">Band</span>
+              <div className="dance-floor">
+                  Dance Floor
+              </div>
+              
             </Col>
             <Col>
               <div className="area-E" style={{ marginTop: '20px', float: 'right' }}>
@@ -256,11 +264,12 @@ class SeatPlanner extends Component {
             </Col>
           </Row>
           <Row>
-            <hr />
-            <hr />
+           <Col className="walkway-horizontal"> W A L K W A Y </Col>
+           <Col  xs={5}></Col>
+           <Col className="walkway-horizontal"> W A L K W A Y  </Col>
           </Row>
           <Row>
-            <Col>
+            <Col xs={3}>
               <div className="area-B" style={{ marginTop: '20px', float: 'left' }}>
                 <h4>Area B</h4>
                 <SeatPicker
@@ -273,6 +282,9 @@ class SeatPlanner extends Component {
                   tooltipProps={{ multiline: true }}
                 />
               </div>
+            </Col>
+            <Col xs={1} className="walkway-vertical">
+            W A L K W A Y
             </Col>
             <Col>
               <div className="area-A" style={{ marginTop: '20px' }}>
