@@ -221,7 +221,7 @@ app.post('/getPaidTablesInfo', (req, res) => {
 })
 app.post('/createEvent', (req, res) => {
     var event = req.body;
-    mysqlConnection.query(`INSERT into event (name, location, date, time, expiration_date, no_of_tables, cost_per_table, isActive, available_tables) VALUES ('${event.name}','${event.location}','${event.date}','${event.time}','${event.expiration_date}','${event.no_of_tables}','${event.cost_per_table}', ${1}, '${event.no_of_tables})`
+    mysqlConnection.query(`INSERT into event (name, location, date, time, expiration_date, no_of_tables, cost_per_table, isActive, available_tables) VALUES ('${event.name}','${event.location}','${event.date}','${event.time}','${event.expiration_date}','${event.no_of_tables}','${event.cost_per_table}', ${1}, '${event.available_tables}')`
         , (err, rows, fields) => {
             if (!err) {
                 let insertId = rows.insertId;

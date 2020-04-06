@@ -10,20 +10,21 @@ export default class Header extends Component {
   constructor(props) {
     super(props)
     this.state = {
-        userName: ''
+        userName: '',
+        isAdmin: false
      
     }
   }
 
   componentWillMount(){
     let user =  JSON.parse(sessionStorage.getItem("user"));
-    if(!user)
+    if(!user ||  !user.exist  )
     {
        window.location.href = "/login"
     }
     else 
     {
-        this.setState({userName: user.user.first_name})
+        this.setState({userName: user.user.first_name, isAdmin: user.user.isAdmin})
     }
   }
  
@@ -34,6 +35,12 @@ export default class Header extends Component {
     window.location.href = "/login"
   }
 
+  gotoCreateEventPage = () => {
+    window.location.href = "/createEvent"
+
+  }
+
+
   render() {
 
     return (
@@ -42,9 +49,17 @@ export default class Header extends Component {
         <Navbar.Collapse className="justify-content-start">
           <Navbar.Text>
             Signed in as: <a href="#login">{this.state.userName}</a>
-          </Navbar.Text>    
+          </Navbar.Text>  
+        
+      
         </Navbar.Collapse>
         <Navbar.Collapse className="justify-content-end">
+        {this.state.isAdmin?   <NavLink onClick={this.gotoCreateEventPage}>
+            Create Event
+        </NavLink>:'' }  
+         <NavLink onClick={() => window.location.href = "/events"}>
+            Show All Events
+        </NavLink>   
         <NavLink onClick={this.signOut}>
             Log Out
         </NavLink>   

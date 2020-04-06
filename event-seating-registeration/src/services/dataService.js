@@ -93,6 +93,15 @@ export class DataService {
         })
     }
 
+    createEvent(event)
+    {
+        let data = event
+        return axios.post(BASE_URL + "createEvent", data).then(response=>{
+            console.log(response,"create event")
+            return response.data;
+        })
+    }
+
 }
 
 export default DataService;

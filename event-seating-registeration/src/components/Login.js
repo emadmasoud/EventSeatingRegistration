@@ -61,8 +61,14 @@ export default class LoginForm extends Component {
         console.log(data)
         if (data.data.success) {
           ToastsStore.success("Successfully Logged In!")
-          sessionStorage.setItem("user", JSON.stringify(data.data.data));
-          this.props.history.push("/events");
+          let userObj = data.data.data;
+          sessionStorage.setItem("user", JSON.stringify(userObj));
+          userObj = userObj.user;
+          console.log(userObj)
+          if(!userObj.isAdmin)
+            this.props.history.push("/events");
+          else
+            this.props.history.push("/dashboard");
         }
         else {
           this.setState({ loginClicked: false });
