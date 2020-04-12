@@ -142,6 +142,9 @@ class EventList extends Component {
                             return <Event event={event} goToTablePicker={this.goToTableSelection}></Event>
                         })
                     }
+                    {
+                        this.state.eventsList.length==0? <div style={{marginTop:'10%'}}> No Events Available right now</div>:""
+                    }
                   
                 </Grid>
             </div>

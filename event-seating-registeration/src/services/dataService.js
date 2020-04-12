@@ -33,8 +33,29 @@ export class DataService {
 
     }
 
+    fetchAllEvents() {
+        try {
+            return axios.get(BASE_URL + "adminEvents").then(response => {
+                if (response.data.success) {
+                    let list = response.data.data.map(ev => {
+                        ev['tables_list'] = []
+                        return ev;
+                    });
+                    return list;
+                }
+            }).catch(err => {
+                return []
+            })
+        }
+        catch (err) {
+            return []
+        }
+
+    }
+
 
     fetchTables(eventId) {
+        console.log(eventId)
         const params = {
             eventID: eventId
         };
@@ -100,6 +121,37 @@ export class DataService {
             console.log(response,"create event")
             return response.data;
         })
+    }
+
+    fetchUsers()
+    {
+        try {
+            return axios.get(BASE_URL + "users").then(response => {
+                if (response.data.success) {
+                   return response.data.data
+                }
+            }).catch(err => {
+                return []
+            })
+        }
+        catch (err) {
+            return []
+        }
+    }
+    fetchPaidUsers(eventId)
+    {
+        try {
+            return axios.get(BASE_URL + `paidusers/${eventId}`).then(response => {
+                if (response.data.success) {
+                   return response.data.data
+                }
+            }).catch(err => {
+                return []
+            })
+        }
+        catch (err) {
+            return []
+        }
     }
 
 }

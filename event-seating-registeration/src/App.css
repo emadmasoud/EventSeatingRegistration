@@ -170,6 +170,8 @@ body, html, .App, #root, .auth-wrapper {
   width: 350px !important;
   cursor: pointer;
 }
+
+
 .ui.card:hover{
   -webkit-box-shadow: 0 10px 10px #777;
   -moz-box-shadow: 0 10px 10px #777;
@@ -221,4 +223,40 @@ text-orientation: mixed;
 
 .band{
   float: right;
+}
+
+.dashboard-card{
+  background-color: rgba(0,0,0,.1) !important;
+  cursor: default !important;
+  border: 1px solid #17a2b8 !important;
+  -webkit-box-shadow: 0 10px 10px #777 !important;
+  -moz-box-shadow: 0 10px 10px #777 !important;
+  box-shadow: 0 10px 10px #777 !important;
+}
+
+.ReactTable{
+  background-color: white !important;
+  display: inline-table;
+  width: 100% !important;
+}
+
+.table-container{
+  padding:5px !important;
+  width:90% !important;
+}
+
+.table-container-dashboard{
+  width:200% !important;
+  display: inline-table !important;
+  margin-left: 15px !important;
+}
+
+.modal {
+  position: relative !important;
+}
+
+.ui.modal{
+  background: none !important;
+  box-shadow: none !important;
+  top: 20% !important;
 }

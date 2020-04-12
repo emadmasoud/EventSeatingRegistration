@@ -33,9 +33,19 @@ mysqlConnection.connect((err) => {
 app.get('/users', (req, res) => {
     mysqlConnection.query('SELECT * FROM user', (err, rows, fields) => {
         if (!err)
-            res.send(JSON.stringify(rows));
+            res.json({ success: true, data: rows });
         else
-            console.log(err);
+            res.json({ success: false, data: err });
+    })
+});
+
+app.get('/paidusers/:eventId', (req, res) => {
+    let {eventId} = req.params;
+    mysqlConnection.query(`SELECT * FROM user_registration_payment where event_id=${eventId}`, (err, rows, fields) => {
+        if (!err)
+            res.json({ success: true, data: rows });
+        else
+            res.json({ success: false, data: err });
     })
 });
 
@@ -46,14 +56,28 @@ app.get('/events', (req, res) => {
            {    
                var finalData = []
                rows.forEach(element => {
-                   if(element.isActive)
+                   if(element.isActive && new Date(element.expiration_date) >= new Date()) // checking expiration date
                    {
                        finalData.push(element)
+                   }
+                   else if(new Date(element.expiration_date) < new Date() && element.isActive)
+                   {
+                       stopRegistration(element.id);
                    }
                });
 
             
             res.json({ success: true, data: finalData });
+           }
+        else
+            console.log(err);
+    })
+});
+app.get('/adminEvents', (req, res) => {
+    mysqlConnection.query('SELECT * FROM event', (err, rows, fields) => {
+        if (!err)
+           {    
+            res.json({ success: true, data: rows });
            }
         else
             console.log(err);
@@ -202,6 +226,7 @@ app.post('/reserveTables', (req, res) => {
 
 });
 
+
 app.post('/getPaidTablesInfo', (req, res) => {
     var info = req.body;
 
@@ -237,7 +262,7 @@ app.post('/createEvent', (req, res) => {
 app.post('/paymentConfirmed', (req, res) => {
     var {userID, eventID, noOfTables} = req.body;
     console.log(userID, eventID, noOfTables)
-    sql = `INSERT into user_registration_payment (user_id, event_id, paid_tables, status) VALUES ('${userID}','${eventID}','${noOfTables}','PAID')`
+    sql = `INSERT into user_registration_payment (user_id, event_id, paid_tables,reserved_tables, status) VALUES ('${userID}','${eventID}','${noOfTables}','${noOfTables}','PAID')`
     mysqlConnection.query(sql,
         (err, rows, fields) => {
             if (!err) {
@@ -341,6 +366,7 @@ updateEventTableCount = (eventID, reservedTablesCountTotal) => {
         if (!err) {
             var info = rows[0];
             var leftCount = info.available_tables - reservedTablesCountTotal;
+            console.log(leftCount,'leftCount in event')
             // if 0 then make it expire
             mysqlConnection.query(`UPDATE event set available_tables = ${leftCount}  WHERE id=${eventID}`, (err, rows, fields) => {
                 if (!err) {
@@ -359,23 +385,49 @@ updatePaidTablesCount = (eventID, userID, paidCount) => {
 
     return new Promise((resolve, reject) => {
         mysqlConnection.query(`SELECT * from user_registration_payment where user_id=${userID} and event_id=${eventID}`, (err, rows, fields) => {
-            if (!err && rows.length) {
-                var info = rows[0];
-                var leftCount = info.paid_tables - paidCount;
-                var sql = '';
-                if(leftCount > 0)
-                    sql = `UPDATE user_registration_payment set paid_tables = ${leftCount}  WHERE user_id=${userID} and event_id=${eventID}`;
+            if (!err) {
+                if( rows.length)
+                {
+                    var info = rows[0];
+                    var leftCount = info.paid_tables - paidCount;
+                    let reserved = Number(info.reserved_tables)+1;
+                 
+                    var sql = '';
+                    if(leftCount >= 0)
+                        sql = `UPDATE user_registration_payment set paid_tables = ${leftCount}  WHERE user_id=${userID} and event_id=${eventID}`;
+                    else
+                        {
+                            sql = `UPDATE user_registration_payment set paid_tables = 0, reserved_tables=${reserved} ,status = 'COMPLETED' WHERE user_id=${userID} and event_id=${eventID}`
+                            updateEventTableCount(eventID, 1)
+                        }
+
+            
+                    mysqlConnection.query(sql, (err, rows, fields) => {
+                        if (!err) {
+                           
+                            resolve(true)
+                        }
+                        else {
+                            reject(false)
+                        }
+                    });
+                }
                 else
-                    sql = `UPDATE user_registration_payment set paid_tables = 0, status = 'COMPLETED' WHERE user_id=${userID} and event_id=${eventID}`
-        
-                mysqlConnection.query(sql, (err, rows, fields) => {
-                    if (!err) {
-                        resolve(true)
-                    }
-                    else {
-                        reject(false)
-                    }
-                });
+                {
+                    sql = `INSERT into user_registration_payment (user_id, event_id, paid_tables,reserved_tables, status) VALUES ('${userID}','${eventID}','${0}','${paidCount}','PAID')`
+                    mysqlConnection.query(sql,
+                        (err, rows, fields) => {
+                            if (!err) {
+                                console.log(rows, fields)
+                                updateEventTableCount(eventID, paidCount)
+                                let insertId = rows.insertId;
+                                resolve(true)
+                            }
+                            else
+                            reject(false)
+                        })
+                }
+               
             }
         })
     })
@@ -398,6 +450,21 @@ isUserExist = (email) => {
         })
     })
 
+}
+
+function stopRegistration(eventId)
+{
+    var sql = `UPDATE event set isActive='0' where id=${eventId}`;
+   
+    mysqlConnection.query(sql, function (err, rows) {
+        if (err) {
+           console.log("Error in stopping the registration")
+        }
+        else
+        {
+            console.log("Registration stopped for event with id "+eventId);
+        }
+    });
 }
 
 
