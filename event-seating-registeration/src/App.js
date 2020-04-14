@@ -25,7 +25,6 @@ function App() {
      <Route exact path='/' component={TermsAndCondition} />
    
      <Route exact path="/events" component={EventList} />   
-     <Route exact path="/users" component={UserManagement} />   
      <Route exact path="/dashboard" component={Dashboard} />   
      <Route exact path="/createEvent" component={CreateEvent} /> 
      <Route exact path="/seatPicker" component={SeatPicker}  />    

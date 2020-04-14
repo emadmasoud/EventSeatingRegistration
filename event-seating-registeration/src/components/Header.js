@@ -53,9 +53,7 @@ export default class Header extends Component {
           {this.state.isAdmin? <NavLink onClick={() => window.location.href = "/dashboard"}>
            Events Details
         </NavLink>:'' }  
-        {this.state.isAdmin? <NavLink onClick={() => window.location.href = "/users"}>
-           User Details
-        </NavLink>:'' } 
+       
           {this.state.isAdmin?  
          <NavLink onClick={this.gotoCreateEventPage}>
             Create Event
