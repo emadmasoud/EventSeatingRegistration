@@ -104,7 +104,8 @@ class EventManagement extends Component {
           };
         var data = {
             eventID: this.props.event.id,
-            tables: [toBeReservedTableList]
+            tables: [toBeReservedTableList],
+            isUser: false
           }
           console.log(data)
           DataService.Instance.reserveTables(data).then(data=>{      
@@ -145,7 +146,7 @@ class EventManagement extends Component {
         return (
             <div className="">
 
-                <Segment className="table-container-dashboard" >
+                <Segment >
 
                     <ReactTable
                         minRows={0}
@@ -190,7 +191,12 @@ class EventManagement extends Component {
                                 Header: 'User',
                                 accessor: 'user_id',
                                 Cell: (row) => {
-                                    return (<div> {row.original.user_id ? row.original.user_id : <Button primary content="Assign User" onClick={() => this.openModalWithData(row.original)}></Button>}</div>)
+                                    
+                                    let user = this.state.allUsers.filter(u=> row.original.user_id == u.id)[0];
+                             
+                                    let user_name = user? user.first_name+" "+user.last_name:undefined;
+
+                                    return (<div> {user_name ?  user_name: <Button primary content="Assign User" onClick={() => this.openModalWithData(row.original)}></Button>}</div>)
                                 },
 
                             }

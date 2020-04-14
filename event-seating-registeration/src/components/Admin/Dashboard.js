@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Grid, Card, Image, Icon, Dropdown,Button } from 'semantic-ui-react';
+import { Grid, Card, Image, Icon, Dropdown,Button , Tab} from 'semantic-ui-react';
 import { connect } from "react-redux";
 import DataService from "../../services/dataService";
 import Header from '../Header';
@@ -8,6 +8,7 @@ import 'react-table/react-table.css';
 import EventManagement from './EventManagement';
 import swal from 'sweetalert';
 import { ToastsStore } from 'react-toasts';
+import UserManagement from './UserManagement';
 
 
 
@@ -16,17 +17,18 @@ class Dashboard extends Component {
         super(props);
         this.state = {
 
-                paidUsers: 0,
-                availableTables: 0,
-                registeredTables: 0,
-                reservedTables:0,
+            paidUsers: 0,
+            availableTables: 0,
+            registeredTables: 0,
+            reservedTables:0,
       
             adminEvents: [],
             adminEventsOptions: [],
             users: [],
             selectedEventId:0,
             selectedEvent:{id:0},
-            allRegisteredUsers:[]
+            allRegisteredUsers:[],
+            paidUsersList:[]
 
         }
     }
@@ -44,7 +46,8 @@ class Dashboard extends Component {
                     selectedEventId: event.id,
                     paidUsers: users.length,
                     availableTables: event.available_tables,
-                    reservedTables: event.no_of_tables - event.available_tables
+                    reservedTables: event.no_of_tables - event.available_tables,
+                    paidUsersList: users
                   })
             })
 
@@ -129,9 +132,18 @@ class Dashboard extends Component {
        
     }
 
+   
+
     render() {
 
-
+        const panes = [
+            { menuItem: 'Event Tables Info', render: () => <Tab.Pane>
+                
+                        <EventManagement event={this.state.selectedEvent}  allUsers={this.state.allRegisteredUsers} updateCount={this.updateCount}></EventManagement>
+                        
+            </Tab.Pane> },
+            { menuItem: 'Event Paid Users Info', render: () => <Tab.Pane><UserManagement event={this.state.selectedEvent} allUsers={this.state.allRegisteredUsers} allPaidUsers={this.state.paidUsersList}></UserManagement></Tab.Pane> }
+          ]
 
         return (
             <div className="">
@@ -206,9 +218,11 @@ class Dashboard extends Component {
 
                     <Grid.Row columns={'sixteen'}>
                      
-                        {this.state.selectedEventId?
-                        <EventManagement event={this.state.selectedEvent}  allUsers={this.state.allRegisteredUsers} updateCount={this.updateCount}></EventManagement>:''
-                        }
+                    {this.state.selectedEventId?
+                        <Tab panes={panes}>
+
+                        </Tab>:''}
+                       
                         
                       
                     </Grid.Row>

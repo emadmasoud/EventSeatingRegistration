@@ -8,25 +8,43 @@ import 'react-table/react-table.css';
 import {ConvertJSONtoCSV} from "easy-json-to-csv-converter";
 
 
+
 class UserManagement extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            allUsers: [],
+            allUsers: this.getPaidUsersInfo(),
             roleFilter: '-1',
-            roleFilterApplied: false,
+            roleFilterApplied: false
 
         }
     }
 
+    getPaidUsersInfo = () =>{
+        let all =  this.props.allUsers? this.props.allUsers: [];
+        let paid = this.props.allPaidUsers? this.props.allPaidUsers:[];
+
+        let final = [];
+        all.forEach(element => {
+            paid.forEach(p_ele=>{
+                if(element.id == p_ele.user_id)
+                   {
+                       element['reserved_tables'] = p_ele['reserved_tables'];
+                       element['event'] = this.props.event.name
+                       final.push(element);
+                   }
+            })
+        });
+
+        return final;
+
+    }
     componentWillMount() {
         let user = JSON.parse(sessionStorage.getItem("user")).user;
         if (!user || user.isAdmin == false) {
             this.props.history.push("/login");
         } else {
-            DataService.Instance.fetchUsers().then(evList => {
-                this.setState({ allUsers: evList })
-            })
+          
         }
     }
 
@@ -66,7 +84,7 @@ class UserManagement extends Component {
 
         return (
             <div className="">
-                <Header></Header>
+                {/* <Header></Header> */}
                 
                 <Container className="table-container">
                 <Grid>
@@ -80,6 +98,10 @@ class UserManagement extends Component {
                         minRows={0}
                         filterable={true}
                         columns={[
+                            {
+                                Header: 'Event',
+                                accessor: 'event',
+                            },
                             {
                                 Header: 'User ID',
                                 accessor: 'id',
@@ -108,6 +130,11 @@ class UserManagement extends Component {
                             {
                                 Header: 'Class',
                                 accessor: 'class',
+
+                            },
+                            {
+                                Header: 'Reserved Tables',
+                                accessor: 'reserved_tables',
 
                             },
                             {

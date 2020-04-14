@@ -142,7 +142,8 @@ class SeatPlanner extends Component {
 
     var data = {
       eventID: this.state.event.id,
-      tables: toBeReservedTableList
+      tables: toBeReservedTableList,
+      isUser:true
     }
     console.log(data)
     DataService.Instance.reserveTables(data).then(data=>{        

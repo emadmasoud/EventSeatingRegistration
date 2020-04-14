@@ -260,3 +260,8 @@ text-orientation: mixed;
   box-shadow: none !important;
   top: 20% !important;
 }
+
+.ui.attached:not(.message)+.ui.attached.segment:not(.top) {
+  border-top: none;
+  width: 1200px;
+}
