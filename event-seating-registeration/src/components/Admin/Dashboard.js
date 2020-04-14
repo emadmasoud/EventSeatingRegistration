@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
-import { Grid, Card, Image, Icon, Dropdown } from 'semantic-ui-react';
+import { Grid, Card, Image, Icon, Dropdown,Button } from 'semantic-ui-react';
 import { connect } from "react-redux";
 import DataService from "../../services/dataService";
 import Header from '../Header';
 import ReactTable from "react-table";
 import 'react-table/react-table.css';
 import EventManagement from './EventManagement';
+import swal from 'sweetalert';
+import { ToastsStore } from 'react-toasts';
 
 
 
@@ -91,6 +93,42 @@ class Dashboard extends Component {
     
     }
 
+    stopRegistration = () =>{
+        let eventID = this.state.selectedEventId;
+        swal({
+            title: "Are you sure?",
+            text: "It will make the event unavailable for all users",
+            icon: "warning",
+         
+          })
+          .then(willDelete => {
+            if (willDelete) {
+                DataService.Instance.stopRegistration(eventID).then(res=>{
+                    DataService.Instance.fetchAllEvents().then(evList => {
+                
+                        let options = evList.map(e => {
+                            return {
+                                key: e.id,
+                                text: e.name,
+                                value: e.id,
+                                label: e.isActive? { color: 'green', empty: true, circular: true }:{ color: 'red', empty: true, circular: true }
+                          
+                            }
+                        });
+        
+                        this.setState({ adminEventsOptions: options , adminEvents: evList})
+                    })
+                    swal({
+                        title: "Success!",
+                        text: "Registration Stopped",
+                        icon: "success"      
+                      })
+                })
+            }
+          });
+       
+    }
+
     render() {
 
 
@@ -98,19 +136,24 @@ class Dashboard extends Component {
         return (
             <div className="">
                 <Header></Header>
-
-                <Grid style={{ textAlign: 'center',marginLeft: '70px' }}>
-                    <Grid.Row columns={1}>
+               
+                <Grid style={{ textAlign: '',marginLeft: '70px' }}>
+                    <Grid.Row columns={2}>
+                  
                         <Grid.Column>
                             <Dropdown
                                 placeholder='Select Event to see details'
                                 fluid
                                 selection
                                 options={this.state.adminEventsOptions}
-                                style={{width:'400px'}}
+                                style={{width:'400px', display:"inline-block", marginRight:'30px'}}
                                 onChange={this.handleChange}                        
                             />
+                           <Button onClick={this.stopRegistration} style={{backgroundColor:'red', color:'white'}}>Stop Registration</Button>
+                            
                         </Grid.Column>
+                        
+                       
                     </Grid.Row>
                     <Grid.Row>
                         <Grid.Column md={3}>

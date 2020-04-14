@@ -122,6 +122,12 @@ export class DataService {
             return response.data;
         })
     }
+    stopRegistration(eventID)
+    {
+        return axios.post(BASE_URL + "stopRegistration", {eventID}).then(response=>{
+            return response.data;
+        })
+    }
 
     fetchUsers()
     {

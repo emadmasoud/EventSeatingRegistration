@@ -276,6 +276,19 @@ app.post('/paymentConfirmed', (req, res) => {
         })
 })
 
+app.post('/stopRegistration', (req, res) => {
+    var {eventID} = req.body;
+    stopRegistration(eventID).then(result=>{
+        if(result)
+            res.json({success:true, data:true})
+        else
+            res.json({success:false, data:false})
+    });
+
+    
+  
+})
+
 
 getUserInfo = (userID) => {
     return new Promise((resolve, reject) => {
@@ -454,17 +467,22 @@ isUserExist = (email) => {
 
 function stopRegistration(eventId)
 {
-    var sql = `UPDATE event set isActive='0' where id=${eventId}`;
+    return new Promise((resolve, reject)=>{
+        var sql = `UPDATE event set isActive='0' where id=${eventId}`;
    
-    mysqlConnection.query(sql, function (err, rows) {
-        if (err) {
-           console.log("Error in stopping the registration")
-        }
-        else
-        {
-            console.log("Registration stopped for event with id "+eventId);
-        }
-    });
+        mysqlConnection.query(sql, function (err, rows) {
+            if (err) {
+               console.log("Error in stopping the registration")
+               resolve(false);
+            }
+            else
+            {
+                console.log("Registration stopped for event with id "+eventId);
+                resolve(true);
+            }
+        });
+    })
+   
 }
 
 
