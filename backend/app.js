@@ -163,9 +163,24 @@ app.post('/login', (req, res) => {
                 res.json({ success: false, data: {}, message: "Wrong Password" });
         }
     });
-
-
 });
+
+
+
+app.post('/resetPassword', (req, res) => {
+    var user = req.body;
+    var password = user.password;
+    var userID = user.email;
+    console.log(user)
+    var sql = `UPDATE user set password = '${password}' WHERE email = '${userID}'`;
+
+    mysqlConnection.query(sql, function (err, rows) {
+        if (err) res.json({ success: false, message: `Password Not Changed` });
+       return  res.json({ success: true, message: `Password Changed` });
+    });
+});
+
+
 
 app.get('/getPrivacyPolicyText', (req, res) => {
 
@@ -287,10 +302,28 @@ app.post('/stopRegistration', (req, res) => {
         else
             res.json({success:false, data:false})
     });
+})
+
+
+app.post('/forgotPassword', (req, res) => {
+    console.log(req.body)
+    var {email, token } = req.body;
+    sendResetPasswordLink(email, token).then(result=>{
+        if(result)
+            res.json({success:true, data:true})
+        else
+            res.json({success:false, data:false})
+    }).catch(err=>{
+        console.log(err)
+        res.json({success:false, data:false})
+    });
 
     
   
 })
+
+
+
 
 
 getUserInfo = (userID) => {
@@ -595,6 +628,46 @@ function sendReservationConfirmationEmail(recepientEmail, tables, eventID) {
        
         // email sending 
 
+    })
+}
+
+
+function sendResetPasswordLink(recepientEmail, token) {
+    return new Promise((resolve, reject) => {
+
+        var bURL = process.env.FRONTEND_BASE_URL;
+        var link = `resetPassword?email=${recepientEmail}&fgpass=${token}`;
+        var email = process.env.SENDER_EMAIL
+        var pass = process.env.SENDER_EMAIL_PASSWORD
+        var testAccount =  { "user": email, "pass":pass }
+
+        // email sending 
+        var mailOptions = new Object();
+        mailOptions = {
+            to: recepientEmail,
+            subject: "Reset Password",
+            html: "<h1>Hello</h1>,<br> Please click on the link to reset your password <br><a href=" + bURL + link + ">Reset My Password</a>"
+        }
+        var smtpTransport = nodemailer.createTransport({
+            service: "Gmail",
+            auth:  {
+                user: testAccount.user,
+                pass: testAccount.pass
+            },
+            tls: {
+                rejectUnauthorized: false
+            }
+        });
+        smtpTransport.sendMail(mailOptions)
+            .then((response) => {
+                var result = new Object();
+                result.message = "Reset Password Link Sent";
+                //console.log(result);
+                resolve(result);
+            }).catch((error) => {
+                // console.log(error);
+                reject(error);
+            })
     })
 }
 const port = process.env.PORT || 5000;

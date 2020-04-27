@@ -9,10 +9,12 @@ import SeatPicker from "./components/SeatPicker";
 import EventList from "./components/EventList";
 import { ToastsContainer, ToastsStore } from 'react-toasts';
 import LoginForm from './components/Login';
+import ForgotPassword from './components/ForgotPassword';
 import Header  from './components/Header';
 import Dashboard from './components/Admin/Dashboard';
 import CreateEvent from './components/Admin/CreateEvent';
 import UserManagement from './components/Admin/UserManagement';
+import ResetPassword from './components/ResetPassword';
 
 
 function App() {
@@ -37,6 +39,8 @@ function App() {
         
         <Route exact path="/register" component={RegistrationForm} />      
         <Route exact path="/login" component={LoginForm} />      
+        <Route exact path="/forgotPassword" component={ForgotPassword} />      
+        <Route  path="/resetPassword" component={ResetPassword} />      
         </div>   
       </div>
      

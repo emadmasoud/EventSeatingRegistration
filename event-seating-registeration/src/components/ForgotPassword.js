@@ -1,27 +1,19 @@
 import React, { Component } from 'react'
 import { Button, Form, Col, Row } from 'react-bootstrap';
-import SeatPicker from 'react-seat-picker'
 import { BASE_URL } from '../Config'
 import { ToastsStore } from 'react-toasts';
 import { Redirect } from 'react-router-dom';
-import DataService from '../services/dataService';
 import axios from 'axios';
-export default class LoginForm extends Component {
+import swal from 'sweetalert';
+export default class ForgotPassword extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      email: '',
-      password: '',
+        email:'',
       loginClicked:false
     }
   }
 
-  componentWillMount() {
-    let user = sessionStorage.getItem("user");
-    if (user) {
-      this.props.history.push("/events");
-    }
-  }
 
   onFormValueChangeHandler = (e) => {
     let text = e.target.value;
@@ -34,8 +26,7 @@ export default class LoginForm extends Component {
 
     var { email, password } = this.state;
     if (
-      email.trim() != "" &&
-      password.trim() != "") {
+      email.trim() != '') {
       return true;
     }
     return false;
@@ -43,32 +34,29 @@ export default class LoginForm extends Component {
 
   }
 
-  registerUser = e => {
+  ForgotPassword = e => {
     e.preventDefault();
+    
     if (!this.checkValidations()) {
       ToastsStore.warning("Fill the required information please")
       return;
     }
-
+    let token = Math.floor((Math.random() * 1000000) + 1);
+    localStorage.setItem("fgpass", token);
     let user = {
       email: this.state.email,
-      password: this.state.password
+      token: token 
 
     };
     this.setState({ loginClicked: true });
-    axios.post(BASE_URL + "login",
+    axios.post(BASE_URL + "forgotPassword",
       user).then(data => {
         console.log(data)
         if (data.data.success) {
-          ToastsStore.success("Successfully Logged In!")
-          let userObj = data.data.data;
-          sessionStorage.setItem("user", JSON.stringify(userObj));
-          userObj = userObj.user;
-          console.log(userObj)
-          if(!userObj.isAdmin)
-            this.props.history.push("/events");
-          else
-            this.props.history.push("/dashboard");
+        swal({
+            title:"Password Reset Email Sent",
+            text:"Please Reset your password with that link",
+        })
         }
         else {
           this.setState({ loginClicked: false });
@@ -90,7 +78,7 @@ export default class LoginForm extends Component {
   registrationForm() {
     return <div>
       <form>
-        <h3>Login</h3>
+        <h3>Forgot Password</h3>
         <Row>
           <Col>
             <div className="form-group">
@@ -106,31 +94,9 @@ export default class LoginForm extends Component {
           </Col>
 
         </Row>
-        <Row>
-          <Col>
-            <div className="form-group">
-              <label>Password</label>
-              <input type="password"
-                required
-                className={"form-control " + this.state.password_error_class}
-                placeholder="Enter password"
-                value={this.state.password}
-                name='password'
-                onChange={this.onFormValueChangeHandler} />
-            </div>
-
-
-          </Col>
-        </Row>
-
-
-        <button type="submit" className="btn btn-primary btn-block mt-3" disabled={this.state.email == '' && this.state.password == '' || this.state.loginClicked} onClick={this.registerUser}>Login</button>
-        <p className="forgot-password text-right">
-          No Account?  <span className="clickable" onClick={() => this.props.history.push("/register")}>sign up?</span>
-        </p>
-        <p className="forgot-password text-right">
-         <span className="clickable" onClick={() => this.props.history.push("/forgotPassword")}>Forgot Password</span>
-        </p>
+       
+        <button type="submit" className="btn btn-primary btn-block mt-3" disabled={this.state.email == '' || this.state.loginClicked} onClick={this.ForgotPassword}>Send Verification Email</button>
+       
       </form>
 
     </div>
